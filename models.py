@@ -19,7 +19,7 @@ class City(Base):
     weather = relationship('Weather', backref='city')
 
     def __repr__(self) -> str:
-        return '<City({}, {}, {})>'.format(self.id, self.city_name, self. country)
+        return '<City({}, {}, {}, {})>'.format(self.id, self.city_name, self. country, self.weather)
     
 
 

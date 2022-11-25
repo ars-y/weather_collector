@@ -46,13 +46,14 @@ class Collector:
         """Сохранить погоду."""
         logging.info('Start saving data.')
         for id, row in enumerate(data, start=1):
+            city = session.query(City).get(id)
             weather = Weather(
+                city=city,
                 weather_type=row.get('weather')[0].get('main'),
                 description=row.get('weather')[0].get('description'),
                 temperature=row.get('main').get('temp'),
                 min_temp=row.get('main').get('temp_min'),
                 max_temp=row.get('main').get('temp_max'),
-                weather_id=id
             )
             session.add(weather)
         session.commit()
