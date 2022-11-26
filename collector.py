@@ -20,10 +20,10 @@ class Collector:
         ]
         if len(coordinates) == 0:
             raise Exception('Coordinates is empty.')
-        logging.info('Coordinates is received.')
+        logging.debug('Coordinates is received.')
         return coordinates
 
-    def get_weather(self, coordinates, url, key):
+    def get_weather(self, coordinates: list[tuple], url: str, key: str) -> list:
         """Получить погоду."""
         data: list = []
         for coords in coordinates:
@@ -32,19 +32,19 @@ class Collector:
                 'lat': latitude, 'lon': longitude,
                 'units': 'metric', 'APPID': key
             }
-            logging.info('GET requiest to weather API.')
+            logging.debug('GET requiest to weather API.')
             response = requests.get(url, params)
             if response.status_code != 200:
                 raise Exception(f'Response status code: {response.status_code}')
             data.append(response.json())
         if len(data) == 0:
             raise Exception('Weather data is empty.')
-        logging.info('Weather data is received.')
+        logging.debug('Weather data is received.')
         return data
     
-    def save(self, data):
+    def save(self, data: list) -> None:
         """Сохранить погоду."""
-        logging.info('Start saving data.')
+        logging.debug('Start saving data.')
         for id, row in enumerate(data, start=1):
             city = session.query(City).get(id)
             weather = Weather(
@@ -57,4 +57,4 @@ class Collector:
             )
             session.add(weather)
         session.commit()
-        logging.info('Saving data is succesfully.')
+        logging.debug('Saving data is succesfully.')

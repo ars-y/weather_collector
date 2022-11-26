@@ -17,24 +17,24 @@ def main():
     collector = Collector()
     while True:
         try:
-            coordinates = collector.get_coords()
-            data = collector.get_weather(coordinates, WEATHER_API_URL, WEATHER_API_KEY)
-            collector.save(data)
+            coords = collector.get_coords()
+            weather = collector.get_weather(coords, WEATHER_API_URL, WEATHER_API_KEY)
+            collector.save(weather)
 
             for instance in session.query(Weather).all():
                 print(instance)
     
-            for city in session.query(City).filter(City.city_name=='Tokyo'):
-                print(city)
+            for city in session.query(City).filter(City.city_name=='Tokyo').all():
+                print(city.weather)
         except Exception as ex:
             logging.critical(ex)
         finally:
-            time.sleep(30 * 1)
+            time.sleep(10 * 1)
     
 
 if __name__ == '__main__':
     logging.basicConfig(
-        level=logging.INFO,
+        level=logging.DEBUG,
         format='[%(asctime)s] : [%(levelname)s] : %(message)s'
     )
     main()
