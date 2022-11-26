@@ -16,12 +16,11 @@ class City(Base):
     country = Column(String(70))
     latitude = Column(Float)
     longitude = Column(Float)
-    weather = relationship('Weather', backref='city')
+    weather = relationship('Weather', back_populates='city')
 
     def __repr__(self) -> str:
-        return '<City({}, {}, {}, {})>'.format(self.id, self.city_name, self. country, self.weather)
+        return '<City({}, {}, {})>'.format(self.id, self.city_name, self.weather)
     
-
 
 class Weather(Base):
     __tablename__ = 'weather_table'
@@ -32,10 +31,11 @@ class Weather(Base):
     min_temp = Column(Integer, nullable=False)
     max_temp = Column(Integer, nullable=False)
     created = Column(DateTime(), default=datetime.now)
-    weather_id = Column(Integer, ForeignKey('cities_table.id'))
+    city_id = Column(Integer, ForeignKey('cities_table.id'))
+    city = relationship('City', back_populates='weather')
 
     def __repr__(self) -> str:
-        return '<Weather({}, {}, {})>'.format(self.id, self.weather_type, self. weather_id)
+        return '<Weather({}, {}, {})>'.format(self.id, self.weather_type, self.description)
 
 
 Base.metadata.create_all(engine)

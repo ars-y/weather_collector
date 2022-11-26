@@ -53,7 +53,7 @@ class Collector:
                     description=row.get('weather')[0].get('description'),
                     temperature=row.get('main').get('temp'),
                     min_temp=row.get('main').get('temp_min'),
-                    max_temp=row.get('main').get('temp_max')
+                    max_temp=row.get('main').get('temp_max'),
                 )
             )
         session.commit()
