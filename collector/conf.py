@@ -7,7 +7,7 @@ from dotenv import find_dotenv, load_dotenv
 load_dotenv(find_dotenv())
 
 url_object = URL.create(
-    'postgresql',
+    'postgresql+psycopg2',
     username=os.getenv('POSTGRES_USER'),
     password=os.getenv('POSTGRES_PASSWORD'),
     host=os.getenv('POSTGRES_HOST'),
