@@ -10,8 +10,8 @@ url_object = URL.create(
     'postgresql',
     username=os.getenv('POSTGRES_USER'),
     password=os.getenv('POSTGRES_PASSWORD'),
-    host=os.getenv('DB_HOST'),
-    database=os.getenv('DB_NAME')
+    host=os.getenv('POSTGRES_HOST'),
+    database=os.getenv('POSTGRES_DB')
 )
 engine = create_engine(url_object, echo=True)
 engine.connect()
