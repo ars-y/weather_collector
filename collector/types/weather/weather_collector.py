@@ -1,16 +1,23 @@
 import logging
 import requests
-from conf import engine
+
+from collector.db.models import City, Weather
+from collector.conf import engine
+from collector.collector import Collector
 from sqlalchemy.orm import sessionmaker
-from models import City, Weather
+
 
 Session = sessionmaker(bind=engine)
 session = Session()
 
-class Collector:
-    """Коллектор собирает данные о погоде и сохраняет в бд."""
+class WeatherCollector(Collector):
+    """
+    Коллектор погоды.
+    Получает данные о погоде через сторонний API.
+    Сохраняет полученные данные в БД.
+    """
     def __init__(self) -> None:
-        pass
+        super().__init__()
 
     def get_coords(self) -> list:
         """Возвращает широту и долготу."""
@@ -23,7 +30,7 @@ class Collector:
         logging.debug('Coordinates is received.')
         return coordinates
 
-    def get_weather(self, coordinates: list[tuple], url: str, key: str) -> list:
+    def get_data(self, coordinates: list[tuple], url: str, key: str) -> list:
         """Получить погоду."""
         data: list = []
         for coords in coordinates:
@@ -42,7 +49,7 @@ class Collector:
         logging.debug('Weather data is received.')
         return data
     
-    def save(self, data: list) -> None:
+    def save_data(self, data: list) -> None:
         """Сохранить погоду."""
         logging.debug('Start saving data.')
         for id, row in enumerate(data, start=1):

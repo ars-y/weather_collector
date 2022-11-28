@@ -1,8 +1,10 @@
 import logging
+
+from collector.db.models import City
+from collector.conf import engine
 from csv import DictReader
-from conf import engine
 from sqlalchemy.orm import sessionmaker
-from models import City
+
 
 Session = sessionmaker(bind=engine)
 session = Session()
