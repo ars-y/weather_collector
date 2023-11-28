@@ -12,6 +12,10 @@ class BaseConfig(BaseSettings):
 
     RETRY_TIME: int = 60*60
 
+    COOKIE_MAX_AGE: int = 60*30
+
+    JWT_SECRET: str
+
     model_config = SettingsConfigDict(
         env_file='.env',
         env_file_encoding='utf-8'
