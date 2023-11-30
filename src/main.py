@@ -17,7 +17,7 @@ async def lifespan(app: FastAPI) -> Generator:
     schedulers.add_job(
         parsing.main,
         'interval',
-        seconds=settings.RETRY_TIME
+        seconds=int(settings.RETRY_TIME)
     )
     schedulers.start()
 
