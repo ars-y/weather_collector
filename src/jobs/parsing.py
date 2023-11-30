@@ -2,11 +2,12 @@ import asyncio
 import json
 
 import aiohttp
-from fastapi import HTTPException, status
+from fastapi import status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.conf import settings
 from src.dependencies.unit_of_work import get_uow
+from src.exceptions.base import BadRequest
 from src.models.city import City
 from src.services.city import CityService
 from src.services.weather import WeatherService
@@ -73,10 +74,15 @@ async def request_weather_data(
     city_id: int = params.pop('city_id')
     async with session.get(url, params=params) as response:
         if response.status != status.HTTP_200_OK:
-            raise HTTPException(
-                status.HTTP_404_NOT_FOUND,
-                'something goes wrong'
-            )
+            extra_msg: dict = {
+                'reason': 'Bad Request',
+                'description': 'Failed to get data from openweather API',
+                'detail': {
+                    'city_id': city_id
+                }
+            }
+            raise BadRequest(extra_msg=extra_msg)
+
         data_bytes: bytes = await response.read()
         data: dict = json.loads(data_bytes.decode())
         data.update(city_id=city_id)

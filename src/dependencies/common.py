@@ -1,4 +1,4 @@
-from typing import Annotated, Optional
+from typing import Annotated
 
 from fastapi import Depends
 
@@ -9,8 +9,8 @@ from src.enums.sql import OrderEnum
 async def query_params_get_list(
     offset: int = 0,
     limit: int = CITIES_NUMBER,
-    sort_by: Optional[str] = None,
-    sort: Optional[str] = OrderEnum.ASCENDING.value
+    sort_by: str | None = None,
+    sort: str = OrderEnum.ASCENDING.value
 ) -> dict:
     """
     Common query parameters to get a list of objects.
