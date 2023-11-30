@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
-from typing import TypeVar, Optional
+from typing import TypeVar
 
 from sqlalchemy import (
+    Select,
     delete as sql_delete,
     select,
     update as sql_update
@@ -28,10 +29,10 @@ class AbstractBaseRepository(ABC):
     @abstractmethod
     async def get_all(
         self,
-        filters: Optional[None] = None,
+        filters: dict | None = None,
         offset: int = 0,
         limit: int = CITIES_NUMBER,
-        order_by_field: Optional[str] = None,
+        order_by_field: str | None = None,
         order: OrderEnum = OrderEnum.ASCENDING
     ):
         """
@@ -77,7 +78,7 @@ class SQLAlchemyRepository(AbstractBaseRepository):
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
 
-    async def get(self, pk: int) -> Optional[SQLModelType]:
+    async def get(self, pk: int) -> SQLModelType | None:
         stmt = select(self._model).where(self._model.id == pk)
         response = await self._session.execute(stmt)
 
@@ -85,28 +86,15 @@ class SQLAlchemyRepository(AbstractBaseRepository):
 
     async def get_all(
         self,
-        filters: Optional[dict] = None,
-        offset: int = 0,
-        limit: int = CITIES_NUMBER,
-        order_by_field: Optional[str] = None,
-        order: OrderEnum = OrderEnum.ASCENDING
+        filters: dict | None = None,
+        **query_params
     ) -> list[SQLModelType]:
         stmt = select(self._model)
         if filters:
             stmt = stmt.filter_by(**filters)
 
-        stmt = stmt.offset(offset).limit(limit)
-
-        columns = self._model.__table__.columns
-        if not order_by_field or order_by_field not in columns:
-            order_by_field = self._model.id
-        else:
-            order_by_field = getattr(self._model, order_by_field)
-
-        if order == OrderEnum.ASCENDING:
-            stmt = stmt.order_by(order_by_field.asc())
-        else:
-            stmt = stmt.order_by(order_by_field.desc())
+        if query_params:
+            stmt = await self._apply_query_params(stmt, **query_params)
 
         response = await self._session.execute(stmt)
 
@@ -123,7 +111,7 @@ class SQLAlchemyRepository(AbstractBaseRepository):
         stmt = stmt.where(self._model.id == pk)
         stmt = stmt.values(**data).returning(self._model)
         response = await self._session.execute(stmt)
-        obj: Optional[SQLModelType] = response.scalar_one_or_none()
+        obj: SQLModelType | None = response.scalar_one_or_none()
 
         return obj
 
@@ -132,6 +120,40 @@ class SQLAlchemyRepository(AbstractBaseRepository):
         stmt = stmt.where(self._model.id == pk)
         stmt = stmt.returning(self._model)
         response = await self._session.execute(stmt)
-        obj: Optional[SQLModelType] = response.scalar_one_or_none()
+        obj: SQLModelType | None = response.scalar_one_or_none()
 
         return obj
+
+    async def _apply_query_params(
+        self,
+        stmt: Select,
+        offset: int = 0,
+        limit: int = CITIES_NUMBER,
+        order_by_field: str | None = None,
+        order: OrderEnum = OrderEnum.ASCENDING,
+        *,
+        model: SQLModelType | None = None
+    ) -> Select:
+        """
+        Returns statement with applied parameters.
+
+        The `model` keyword allows to select another SQL model
+        for which to apply the parameters (JOIN cases).
+        """
+        if not model:
+            model = self._model
+
+        stmt = stmt.offset(offset).limit(limit)
+
+        columns = model.__table__.columns
+        if not order_by_field or order_by_field not in columns:
+            order_by_field = model.id
+        else:
+            order_by_field = getattr(model, order_by_field)
+
+        if order == OrderEnum.ASCENDING:
+            stmt = stmt.order_by(order_by_field.asc())
+        else:
+            stmt = stmt.order_by(order_by_field.desc())
+
+        return stmt
