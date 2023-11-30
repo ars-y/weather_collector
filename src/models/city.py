@@ -1,12 +1,7 @@
-from typing import TYPE_CHECKING
-
-from sqlalchemy.orm import Mapped, relationship
+from sqlalchemy.orm import Mapped
 
 from src.api.v1.schemas.response.city import CityResponseSchema
 from src.models.base import Base
-
-if TYPE_CHECKING:
-    from src.models.weather import Weather
 
 
 class City(Base):
@@ -17,10 +12,6 @@ class City(Base):
     country: Mapped[str]
     latitude: Mapped[float]
     longitude: Mapped[float]
-
-    weather: Mapped['Weather'] = relationship(
-        back_populates='city'
-    )
 
     def to_pydantic_schema(self) -> CityResponseSchema:
         return CityResponseSchema(
